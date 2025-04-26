@@ -1,0 +1,2 @@
+Looking for a Python Developer with experience in machine learning, NLP, and cloud deployment (AWS or GCP).
+Must be familiar with PyTorch, TensorFlow, and have a strong background in backend development using Flask or FastAPI.
