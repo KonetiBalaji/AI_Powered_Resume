@@ -1,0 +1,163 @@
+**Advanced Level Presentation Notes**
+
+# Project: AI-Powered Resume Screening and Candidate Matching
+
+---
+
+## ⚖️ 1. __`__init__.py`__ (App Initialization)
+- Purpose: Makes the `app/` and `tests/` folders Python packages.
+- Automatically enables modular imports across the project.
+- Important for clean project structure and scalable architecture.
+
+---
+
+## 🤖 2. `models.py` and `test_models.py`
+- Purpose:
+  - `models.py` dynamically loads either:
+    - A **Local Embedding Model** (like MiniLM, MPNet, DistilBERT)
+    - OR an **OpenAI Model** (GPT-4, GPT-3.5)
+  - Based on settings in `config.py` (MODEL_PROVIDER).
+- Key Functions:
+  - `get_embedding(text)` ➔ returns vector embedding.
+  - `extract_skills_with_model(text)` ➔ extracts top skills (only with OpenAI).
+- Why?
+  - **Local Models** (MiniLM etc.): Cannot "generate" skills. Only provide numerical vector representations.
+  - **OpenAI Models** (GPT): Can read, understand, and generate human-like summaries, skills.
+- Tested:
+  - Correct model loading
+  - Correct skill extraction behavior depending on mode.
+
+---
+
+## 🔢 3. `parser.py` and `test_parser.py`
+- Purpose: Resume Parsing & Metadata Extraction
+- Key Functions:
+  - `extract_text_from_pdf(file_path)` ➔ Reads full resume text.
+  - `extract_name(text)` ➔ Uses **spaCy NER** to detect PERSON entities.
+  - `extract_email(text)` ➔ **Regex** to detect valid email patterns.
+  - `extract_phone(text)` ➔ **Regex** to detect mobile/phone numbers.
+  - `parse_resume(file_path)` ➔ Combines everything.
+- Advanced Touch:
+  - Handles incomplete PDFs gracefully.
+  - Modular design to extend parsers later (DOCX, LinkedIn scraping, etc.)
+- Test:
+  - Ensures extraction even if phone/email is missing.
+
+---
+
+## 🔍 4. `matcher.py` and `test_matcher.py`
+- Purpose: Match all available resumes to a Job Description (JD)
+- Core idea:
+  - `parse_resume`➔ extract resume text.
+  - `get_embedding` for resume text and JD text.
+  - Compute **Cosine Similarity**.
+- Outcome:
+  - Sorted list of candidates by matching score.
+- Test:
+  - Validates if top matches are correctly computed.
+
+---
+
+## 🌟 5. `bias_checker.py` and `test_bias_checker.py`
+- Purpose: Test **algorithmic bias**
+- Mechanism:
+  - Same resume is simulated with different candidate names (diverse ethnicities).
+  - Matching scores compared.
+- Advanced Insight:
+  - If names alone cause large variation in matching score ➔ model bias exists.
+- Test:
+  - Checks if simulation works correctly.
+
+---
+
+## 🦄 6. `batch_bias_checker.py` and `test_batch_bias_checker.py`
+- Purpose:
+  - Batch check **real-world resumes** against the JD.
+  - Detect unintentional bias patterns.
+- Visualizations:
+  - Horizontal bar chart.
+- Test:
+  - Ensures outputs are non-empty and CSV/plots are saved.
+
+---
+
+## 🌍 7. `generated_test_resumes.py` and `label_resume.py`
+- Purpose:
+  - Created 50 synthetic resumes with random skills.
+  - `label_resume.py` allows **manual ground-truth labeling** (y/n) one-time.
+- Why Advanced?
+  - Makes Evaluation reproducible without re-labeling manually.
+  - JSON storage ➔ scalable for larger datasets.
+
+---
+
+## 📊 8. `evaluation.py` and `test_evaluation.py`
+- Purpose:
+  - Evaluate system quality against manually labeled ground-truth.
+  - Metrics computed:
+    - Precision
+    - Recall
+    - F1-Score
+    - Accuracy
+    - Confusion Matrix
+- Advanced Behavior:
+  - Handles undefined precision warnings gracefully.
+  - Saves output graphs and tables for reporting.
+
+---
+
+## 📁 9. `screen_resumes.py` and `test_screen_resumes.py`
+- Purpose:
+  - Production-like bulk screening of new resumes.
+  - Identify “shortlisted” candidates based on threshold.
+- Visualization:
+  - Real-time visual match score bar plots.
+- Test:
+  - Screens at least one file properly.
+
+---
+
+## 📚 10. `utils.py`
+- Purpose:
+  - Provides reusable helper functions if needed.
+- Currently empty since no complex helper logic required yet.
+
+---
+
+## 🟢 11. Frontend: `frontend/streamlit_app.py`
+- Built using **Streamlit**.
+- Features:
+  - Upload resume & JD.
+  - Real-time similarity score.
+  - Candidate profile display (Name, Email, Phone, Skills).
+  - Sidebar navigation.
+  - Progress bar for loading states.
+- Advanced UX:
+  - Auto handles both local and OpenAI backends.
+  - Smooth error handling (e.g., NotImplementedError).
+
+---
+
+## 💾 12. `run_tests.py`
+- Master script to run all unit tests together.
+
+---
+
+## 📝 13. README.md and `requirements.txt`
+- Clear instructions for setup and execution.
+- Requirements pinned for reproducibility.
+- Project ready for GitHub publishing.
+
+---
+
+# ✨ Conclusion:
+- **Advanced Modular Design** ➔ Clear separation of parsing, matching, evaluation, bias detection, frontend.
+- **Scalable Architecture** ➔ Easily extendable (DOCX parsing, multi-JD matching, ATS integration).
+- **Industry Best Practices** ➔ Ground-truth validation, bias auditing, model explainability metrics.
+
+---
+
+# 📊 Visual Flow (High-level)
+__Upload Resumes__
+➔ __Parse__ ➔ __Embed__ ➔ __Match__ ➔ __Score__ ➔ __Shortlist / Evaluate / Audit Bias__ ➔ __Streamlit Frontend Display__
+
